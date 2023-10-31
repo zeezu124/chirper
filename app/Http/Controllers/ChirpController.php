@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\Chirp;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\RedirectResponse;
 
 class ChirpController extends Controller
 {
@@ -69,13 +71,24 @@ class ChirpController extends Controller
     {
         $this->authorize('update', $chirp);
 
-        $validated = $request->validate([
-            'message' => 'required|string|max:255',
-        ]);
+        Log::info(print_r(implode(',', Chirp::VALID_STATUSES), true));
 
-        $chirp->update($validated);
 
-        return redirect()->route('chirps.index');
+        try {
+            $validated = $request->validate([
+                'message' => 'required|string|max:255',
+            ]);
+
+            $validated['status'] = CHIRP::STATUS_EDITED;
+
+            $chirp->update($validated);
+
+            return redirect()->route('chirps.index');
+
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+            return redirect()->route('chirps.edit', ['chirp' => $chirp]);
+        }
     }
 
     /**

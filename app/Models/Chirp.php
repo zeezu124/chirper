@@ -11,8 +11,23 @@ class Chirp extends Model
 {
     use HasFactory;
 
+    const STATUS_CHIRPED = 'chirped';
+    const STATUS_EDITED = 'edited';
+    const STATUS_DELETED = 'deleted';
+
+    const VALID_STATUSES = [
+        self::STATUS_CHIRPED,
+        self::STATUS_EDITED,
+        self::STATUS_DELETED,
+    ];
+
     protected $fillable = [
         'message',
+        'status'
+    ];
+
+    protected $rules = [
+        'status' => 'required|in:' . self::STATUS_CHIRPED . ',' . self::STATUS_EDITED . ','. self::STATUS_DELETED,
     ];
 
     protected $dispatchesEvents = [
@@ -23,4 +38,6 @@ class Chirp extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
 }
